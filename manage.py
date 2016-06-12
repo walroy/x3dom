@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from __future__ import with_statement
+
 # -------------------------------------------------------------------
 # NOTE:
 # What is written here is what this build file should do, not what it
@@ -68,9 +68,9 @@ from __future__ import with_statement
 try:
     import argparse
 except:
-    print "\nYou need to install argparse. Please run the following command:"
-    print "on your command line and try again:\n"
-    print "    easy_install argparse\n"
+    print("\nYou need to install argparse. Please run the following command:")
+    print("on your command line and try again:\n")
+    print("    easy_install argparse\n")
     exit()
 
 import os
@@ -143,7 +143,7 @@ def build(mode='production'):
             """
 #            shutil.copy(src, nodes_dest)
         except:
-            print "  Error copying file to %s" % component
+            print("  Error copying file to %s" % component)
     # done with components
     
     # ~~ copy other files ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -177,15 +177,15 @@ def release(version='snapshot'):
     _zipdir(DIST_ROOT, 'dist/x3dom-%s.zip' % version)
 
 def runserver():
-    import SimpleHTTPServer
-    import SocketServer
+    import http.server
+    import socketserver
 
     print("Starting development server...")
     print("Open your browser and visit http://localhost:8080/")
     print("Press Ctrl-C to quit.")
 
-    Handler = SimpleHTTPServer.SimpleHTTPRequestHandler
-    httpd = SocketServer.TCPServer(("", 8080), Handler)
+    Handler = http.server.SimpleHTTPRequestHandler
+    httpd = socketserver.TCPServer(("", 8080), Handler)
     httpd.serve_forever()
 
 
@@ -298,7 +298,7 @@ def _zipdir(basedir, archivename):
                 # skip self and other zip files
                 if os.path.basename(fn) == os.path.basename(archivename):
                     continue
-                print("Zipping %s" % fn)
+                print(("Zipping %s" % fn))
                 absfn = os.path.join(root, fn)
                 zfn = absfn[len(basedir)+len(os.sep):] #XXX: relative path
                 z.write(absfn, zfn)

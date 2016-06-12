@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from StringIO import StringIO
+from io import StringIO
 from optparse import OptionParser
 import os
 from os.path import isfile, join
@@ -8,8 +8,8 @@ import re
 from subprocess import Popen, PIPE
 import sys
 
-import jsmin
-from jspacker import JavaScriptPacker
+from . import jsmin
+from .jspacker import JavaScriptPacker
 
 
 VERSION_TEMPLATE = """
@@ -38,7 +38,7 @@ class packer(object):
     
     version_out = "version.js"
     
-    print "Generating version.js"
+    print("Generating version.js")
     
     # Read the base-version from the VERSION file
     if os.path.isfile(version_in):
@@ -50,7 +50,7 @@ class packer(object):
       version_file.close()
       
     else:
-      print "FATAL: Cannot find VERSION file: " + version_in
+      print("FATAL: Cannot find VERSION file: " + version_in)
       sys.exit(0)
     
     # Extract the git revision 
@@ -60,14 +60,14 @@ class packer(object):
     except:
       git_revision = 0
       git_date = 0
-      print "  WARNING:  Cannot find git executable"
+      print("  WARNING:  Cannot find git executable")
       
-    print "  Input    ", os.path.abspath(version_in)
-    print "  Output   ", os.path.abspath(version_out)
-    print "  Version  ", version
-    print "  Revision ", git_revision
-    print "  Date     ", git_date
-    print ""
+    print("  Input    ", os.path.abspath(version_in))
+    print("  Output   ", os.path.abspath(version_out))
+    print("  Version  ", version)
+    print("  Revision ", git_revision)
+    print("  Date     ", git_date)
+    print("")
     
     # Write the version and revision to file
     version_js_file = open(version_out, "w")
@@ -94,12 +94,12 @@ class packer(object):
       """
       # print "File:", filename
       try:
-        print "  " + os.path.abspath(filename)
+        print("  " + os.path.abspath(filename))
         f = open(filename, 'r')
         concatenated_file += f.read()
         f.close()
       except:
-        print "Could not open input file '%s'. Skipping" % filename    
+        print("Could not open input file '%s'. Skipping" % filename)    
       concatenated_file += "\n"
       return concatenated_file
   
@@ -132,8 +132,8 @@ class packer(object):
     @type src_prefix_path: String
     """
     
-    print "output file:", output_file
-    print "input_files:", input_files
+    print("output file:", output_file)
+    print("input_files:", input_files)
     
     version_out = ""
     
@@ -144,7 +144,7 @@ class packer(object):
         elif os.path.isfile("src/VERSION"):
             version_file_name = "src/VERSION"
         else:
-            print "FATAL: Cannot find any VERSION file"
+            print("FATAL: Cannot find any VERSION file")
             sys.exit(0)
     
         # parse file & generate version.js
@@ -158,7 +158,7 @@ class packer(object):
     out_len = 0
     
     # Merging files
-    print "Packing Files"
+    print("Packing Files")
     for (_, files) in input_files:
         for f in files:
             if f == version_out:
@@ -180,19 +180,19 @@ class packer(object):
                       concatenated_file = self._mergeFile(concatenated_file, join(filename,node_file))
             """
     
-    print ""
+    print("")
     
     outpath = os.path.dirname(os.path.abspath(output_file))
     
     if not os.access(outpath, os.F_OK):
-      print "Create Dir ", outpath
+      print("Create Dir ", outpath)
       os.mkdir(outpath)
     
     # Packaging
-    print "Packaging"
-    print self.VERSION_STRING
-    print "  Algo    " + packaging_module
-    print "  Output  " + os.path.abspath(output_file)
+    print("Packaging")
+    print(self.VERSION_STRING)
+    print("  Algo    " + packaging_module)
+    print("  Output  " + os.path.abspath(output_file))
     
     # JSMIN
     if packaging_module == "jsmin":
@@ -248,8 +248,8 @@ class packer(object):
     # Output some stats
     in_len = len(concatenated_file)    
     ratio = float(out_len) / float(in_len);
-    print "  Packed  %s -> %s" % (in_len, out_len)
-    print "  Ratio   %s" % (ratio)
+    print("  Packed  %s -> %s" % (in_len, out_len))
+    print("  Ratio   %s" % (ratio))
 
 if __name__ == '__main__':
     parser = OptionParser(usage)
@@ -260,13 +260,13 @@ if __name__ == '__main__':
     (options, input_files) = parser.parse_args()
     
     if len(input_files) == 0:
-      print parser.print_help()
-      print "- No input files specified. Exiting -"
+      print(parser.print_help())
+      print("- No input files specified. Exiting -")
       sys.exit(0)
     
     if not options.outfile:
-      print parser.print_help()
-      print "- Please specify an output file using the -o options. Exiting. -"
+      print(parser.print_help())
+      print("- Please specify an output file using the -o options. Exiting. -")
       sys.exit(0)
     
     x3dom_packer = packer()

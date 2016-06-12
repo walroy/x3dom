@@ -186,11 +186,11 @@ def commentFolder(src, target):
 				for fileEntry in entry["files"]:
 					commentFile(src+prefix+fileEntry["file"], target+prefix+fileEntry["file"]);
 			else:
-				print "entry without path or files"
+				print("entry without path or files")
 				
 def commentFile(src, target):
 	# read JS file
-	print "Reading JS file \"" + src + "\" ...\n",
+	print("Reading JS file \"" + src + "\" ...\n", end=' ')
 
 	try:
 		f = open(src, 'r')
@@ -198,7 +198,7 @@ def commentFile(src, target):
 		f.close()
 					
 	except:
-		print "Error while reading JS file."
+		print("Error while reading JS file.")
 		raise
 		
 	result = "/** @namespace x3dom.nodeTypes */\n";
@@ -215,21 +215,21 @@ def commentFile(src, target):
 	f.write(result)    
 	f.close() 
 
-	print "Success."
+	print("Success.")
 
 	
 ## main script
 
 #parse args
 if len(sys.argv) == 2 and sys.argv[1] == "--a":
-	print "commenting default folder"
+	print("commenting default folder")
 	commentFolder("../../src/", "x3dom_commented/")
 elif len(sys.argv) == 3:
 	commentFile(sys.argv[1], sys.argv[2])
 elif len(sys.argv) == 4 and sys.argv[3] == "--a":
 	commentFolder(sys.argv[1], sys.argv[2])
 else:
-	print "Usage: python " + sys.argv[0] + " <ORIGINAL_FILE> <ANNOTATED_FILE> [--x][--a]"
+	print("Usage: python " + sys.argv[0] + " <ORIGINAL_FILE> <ANNOTATED_FILE> [--x][--a]")
 	#print "       --x: generate .xdf files"
 	#print "       --a: comment whole folder"
 	quit()

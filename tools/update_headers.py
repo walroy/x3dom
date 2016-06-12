@@ -3,7 +3,7 @@
 
 import os, sys,shutil,re
 
-from packages import FULL_PROFILE, prefix_path
+from .packages import FULL_PROFILE, prefix_path
 
 FULL_PROFILE = prefix_path(FULL_PROFILE, '../../src')
 
@@ -18,8 +18,8 @@ for include in FULL_PROFILE:
 
 findreplace = [
 	(re.compile(
-		ur'<!-- BEGIN:X3DOM -->.*<!-- END:X3DOM -->',re.U|re.M|re.DOTALL), 
-		ur'<!-- BEGIN:X3DOM -->' + x3dom_includes + '<!-- END:X3DOM -->'
+		r'<!-- BEGIN:X3DOM -->.*<!-- END:X3DOM -->',re.U|re.M|re.DOTALL), 
+		r'<!-- BEGIN:X3DOM -->' + x3dom_includes + '<!-- END:X3DOM -->'
 	),
 ]
 
@@ -28,9 +28,9 @@ def replaceStringInFile(filePath):
    "replaces all string by a regex substitution"
    backupName=filePath+'~backup~'
 
-   print 'reading:', filePath
+   print('reading:', filePath)
    input = open(filePath,'rb')
-   s=unicode(input.read(),'utf-8')
+   s=str(input.read(),'utf-8')
    input.close()
 
    numRep=None
@@ -41,7 +41,7 @@ def replaceStringInFile(filePath):
       s=outtext
 
    if numRep:
-      print ' writing:', filePath
+      print(' writing:', filePath)
       shutil.copy2(filePath, backupName)
       outF = open(filePath,'r+b')
       outF.read() # we do this way to preserve file creation date

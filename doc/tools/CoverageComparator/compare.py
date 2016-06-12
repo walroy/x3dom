@@ -70,7 +70,7 @@ def updateNodeComparison(xml, context):
 #------------------------------------------------------------------------------------------------------
 
 def collectParentFieldsRecursive( nodeComparison, parentComparison ):
-	print "collecting parent "+parentComparison.name+" for "+nodeComparison.name
+	print("collecting parent "+parentComparison.name+" for "+nodeComparison.name)
 	
 	for parentFieldName in parentComparison.fieldNames:
 			parentField = parentComparison.fields[parentComparison.fieldNames.index(parentFieldName)]
@@ -138,7 +138,7 @@ def createComparisonPage():
 		
 ## main script
 if len(sys.argv) <= 2:
-    print "Usage: python " + sys.argv[0] + " <NDF_FOLDER> <XNDF_FOLDER>"
+    print("Usage: python " + sys.argv[0] + " <NDF_FOLDER> <XNDF_FOLDER>")
     quit()
 
 ndfs = []
@@ -146,7 +146,7 @@ xndfs = []
 
     
 # read NFD folder
-print "Reading folder \"" + sys.argv[1] + "\" ...\n",
+print("Reading folder \"" + sys.argv[1] + "\" ...\n", end=' ')
 
 for dirname, dirnames, filenames in os.walk(sys.argv[1]):
 
@@ -157,7 +157,7 @@ for dirname, dirnames, filenames in os.walk(sys.argv[1]):
 		
 
 # read XNFD folder
-print "Reading folder \"" + sys.argv[2] + "\" ...\n",
+print("Reading folder \"" + sys.argv[2] + "\" ...\n", end=' ')
 		
 		
 for dirname, dirnames, filenames in os.walk(sys.argv[2]):
@@ -181,9 +181,9 @@ for node in nodes:
 
 html = createComparisonPage()
     
-print "Writing result page"
+print("Writing result page")
 f = open("comparison.html", 'w')
 f.write(html)    
 f.close() 
 	
-print "Success."
+print("Success.")
