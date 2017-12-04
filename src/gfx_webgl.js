@@ -66,6 +66,7 @@ x3dom.gfx_webgl = (function () {
 
         for (var i = 0; i < validContextNames.length; i++) {
             try {
+				
                 ctx = canvas.getContext(validContextNames[i], ctxAttribs);
 
                 //If context creation fails, retry the creation with failIfMajorPerformanceCaveat = false
@@ -108,10 +109,16 @@ x3dom.gfx_webgl = (function () {
                         x3dom.caps.FPL_TEXTURES = ctx.getExtension("OES_texture_float_linear");
                         x3dom.caps.STD_DERIVATIVES = ctx.getExtension("OES_standard_derivatives");
                         x3dom.caps.DRAW_BUFFERS = ctx.getExtension("WEBGL_draw_buffers");
+						x3dom.caps.DEPTH_TEXTURE = ctx.getExtension("WEBGL_depth_texture");
                         x3dom.caps.DEBUGRENDERINFO = ctx.getExtension("WEBGL_debug_renderer_info");
-                        x3dom.caps.DEPTH_TEXTURE = ctx.getExtension("WEBGL_depth_texture");
-                        x3dom.caps.EXTENSIONS = ctx.getSupportedExtensions();
-
+						x3dom.caps.EXTENSIONS = ctx.getSupportedExtensions();
+						
+						//Enabled WebGL2 breaks picking if we use the depth_texture extension for the picking fbo
+						if ( x3dom.Utils.isWebGL2Enabled() )
+						{
+							x3dom.caps.DEPTH_TEXTURE = null;
+						}
+                        
                         if ( x3dom.caps.DEBUGRENDERINFO ) {
                             x3dom.caps.UNMASKED_RENDERER_WEBGL = ctx.getParameter( x3dom.caps.DEBUGRENDERINFO.UNMASKED_RENDERER_WEBGL );
                             x3dom.caps.UNMASKED_VENDOR_WEBGL = ctx.getParameter( x3dom.caps.DEBUGRENDERINFO.UNMASKED_VENDOR_WEBGL );
@@ -618,7 +625,7 @@ x3dom.gfx_webgl = (function () {
                     positionBuffer = gl.createBuffer();
                     shape._webgl.buffers[q6 + 1] = positionBuffer;
                     gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-
+                    
                     vertices = new Float32Array(shape._webgl.positions[q]);
 
                     gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
@@ -786,7 +793,7 @@ x3dom.gfx_webgl = (function () {
                 url = bgnd._nameSpace.getURL(url[0]);
 
                 bgnd._webgl.texture = x3dom.Utils.createTexture2D(gl, bgnd._nameSpace.doc, url,
-                    true, bgnd._vf.crossOrigin, true, false);
+                    true, bgnd._vf.crossOrigin, false, false);
 
                 bgnd._webgl.primType = gl.TRIANGLE_STRIP;
 
@@ -1099,6 +1106,37 @@ x3dom.gfx_webgl = (function () {
                     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
                     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
                     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+					
+					if ( bgnd._vf.scaling && bgnd._webgl.texture.ready )
+					{
+                        var ratio       = 1.0;
+						var viewport    = new x3dom.fields.SFVec2f(that.canvas.width, that.canvas.height);
+						var texture     = new x3dom.fields.SFVec2f(bgnd._webgl.texture.width, bgnd._webgl.texture.height);
+                                          
+                        if ( viewport.x > viewport.y )
+                        {
+                            ratio = viewport.x / texture.x
+                            texture.x = viewport.x;
+                            texture.y = texture.y * ratio;
+                        }
+                        else
+                        {
+                            ratio = viewport.y / texture.y
+                            texture.y = viewport.y;
+                            texture.x = texture.x * ratio;
+                        }
+                        
+						var scale       = viewport.divideComponents( texture );
+						var translation = texture.subtract( viewport ).multiply( 0.5 ).divideComponents( texture );
+					}
+					else
+					{
+						var scale       = new x3dom.fields.SFVec2f(1.0, 1.0);
+						var translation = new x3dom.fields.SFVec2f(0.0, 0.0);
+					}
+					
+					sp.scale = scale.toGL();
+					sp.translation = translation.toGL();
                 }
 
                 gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, bgnd._webgl.buffers[0]);
@@ -2087,6 +2125,7 @@ x3dom.gfx_webgl = (function () {
                                    shader._vf.ambientFactor.y +
                                    shader._vf.ambientFactor.z) / 3;
             sp.transparency = 1.0 - shader._vf.alphaFactor;
+            sp.environmentFactor = shader._vf.environmentFactor.x;
 
             if (shader.getDisplacementMap()) {
               tex = x3dom.Utils.findTextureByName(s_gl.texture, "displacementMap");
@@ -2132,6 +2171,7 @@ x3dom.gfx_webgl = (function () {
             sp.shininess = mat._vf.shininess;
             sp.ambientIntensity = mat._vf.ambientIntensity;
             sp.transparency = mat._vf.transparency;
+            sp.environmentFactor = 0.0;
             if (x3dom.isa(mat, x3dom.nodeTypes.TwoSidedMaterial)) {
                 twoSidedMat = true;
                 sp.backDiffuseColor = mat._vf.backDiffuseColor.toGL();
@@ -2373,10 +2413,11 @@ x3dom.gfx_webgl = (function () {
             this.stateManager.disable(gl.CULL_FACE);
         }
 
-
         // transformation matrices
         var model_view = mat_view.mult(transform);
         var model_view_inv = model_view.inverse();
+
+        sp.isOrthoView = ( mat_proj._33 == 1 ) ? 1.0 : 0.0;
 
         sp.modelViewMatrix = model_view.toGL();
         sp.viewMatrix = mat_view.toGL();
